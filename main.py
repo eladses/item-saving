@@ -24,7 +24,7 @@ class GoogleSheetProcessor:
         """
         try:
             sheet_A = self.sheet.worksheet("responses")
-            sheet_A_processed = None
+            sheet_A_processed = self.sheet.worksheet("registered")
             
             # Check if "A_processed" sheet exists, otherwise create it
             try:
@@ -38,20 +38,23 @@ class GoogleSheetProcessor:
                 return
             
             # Add ID column header
-            headers = data[0] + ["ID"]
-            processed_data = [headers]
+            # headers = data[0] + ["ID"]
+            # processed_data = [headers]
+            processed_data = []
             
             # Process rows
-            for row in data[1:]:  # Exclude headers
-                row.append(str(uuid.uuid4()))  # Add unique ID
+            for i, row in enumerate(data[1:], start=2):  # Exclude headers
+                print(row)
+                if (row[1]=='' or row[3]=='V'):
+                    continue
+                row[-1] = str(uuid.uuid4())  # Add unique ID
                 processed_data.append(row)
-            
+                sheet_A.update_cell(i, 4, "V")
             # Clear A_processed and insert new data
-            sheet_A_processed.clear()
-            sheet_A_processed.insert_rows(processed_data)
+            sheet_A_processed.insert_rows(processed_data, row=2)
             
-            # Clear the original sheet A
-            sheet_A.clear()
+            # # Clear the original sheet A
+            # sheet_A.clear()
             print("Processing complete: Data moved to 'A_processed' with ID column added.")
         
         except Exception as e:
